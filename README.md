@@ -6,7 +6,7 @@ and morph from one page to the next.
 
 New here? Read **[docs/concept.md](docs/concept.md)** (the reading experience) and
 **[docs/architecture.md](docs/architecture.md)** (how it's built). The roadmap is
-**[docs/plan.md](docs/plan.md)**.
+**[docs/roadmap.md](docs/roadmap.md)**.
 
 ## The deliverable
 **`dist/index.html`** is the whole experience in one self-contained file: open it offline by
@@ -42,4 +42,4 @@ motion, morph, navigation, and accessibility are shared, so every page inherits 
 ## Status
 Foundation + intro and the four week introductions are alive; the moon **morphs** from crescent to
 first quarter across the Week One to Week Two turn. Remaining pages are decomposed and animated
-through the pipeline, week by week, per `docs/plan.md`.
+through the pipeline, week by week, per `docs/roadmap.md`.

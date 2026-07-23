@@ -29,6 +29,24 @@ phase from one spread to the next; where the moon isn't the link, a mote of ligh
 - **Rest, don't exit:** leaving keeps your place; you return to the same moon.
 - Motion honours `prefers-reduced-motion` — everything settles to a quiet still.
 
+## Why it is not a slideshow
+A slideshow advances between flat, dead pictures. This does the opposite in four concrete ways:
+
+1. **Every page is a diorama, not an image.** Background, objects, and text are separate planes.
+   Objects have depth and react to the pointer / tilt (parallax), and each carries its own idle
+   life. There is always something breathing.
+2. **Pages don't cut — they morph.** A shared object (above all the moon) is one continuous
+   element that glides, grows, and changes phase across the turn, so the book is one world, not a
+   deck of slides. The travelling light does the same in Week Four.
+3. **The words perform.** Live text arrives in a reading cadence, line by line, timed to the beat
+   of the scene, with the book's "whispered" lines set apart. You are being read to, not shown a
+   caption.
+4. **It asks something of you.** The moon rail is a thing you pull through the month; Night 29
+   sends you outside; Night 30 waits on the real sky. The reader participates.
+
+The restraint is deliberate: motion is matte and slow (a bedtime book), so "alive" means *present
+and breathing*, never busy or flashing.
+
 ## Two moments only the screen can do
 - **Night 29 — The Looking:** the room dissolves into a real dusk sky and invites the reader
   *outside* to find the first new crescent.

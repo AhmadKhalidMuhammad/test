@@ -89,20 +89,33 @@ def extract(name, warm=(), notblue=(), butterflies=(), telea_below=470):
     objs = {}
     for oid, b, *rest in warm:
         objs[oid] = warm_grabcut(b)
-    def notblue_mask(b, c):
-        # a colourful object (butterfly) on blue sky. Cut a clean solid silhouette first
-        # (largest component -> no nearby text, no edge bleed), then reconnect thin
-        # antennae only in a small box just above the head so they aren't dropped.
-        sky = ((Hh >= 95) & (Hh <= 140) & (S > 25) & (V > 100)).astype(np.uint8)
-        ns = ((1 - sky).astype(np.uint8)) & box(b)
-        core = largest(fillh(cv2.morphologyEx(ns, cv2.MORPH_CLOSE, np.ones((c, c), np.uint8))))
-        ys, xs = np.where(core > 0); cx = int(xs.mean()); top = int(ys.min())
-        abox = np.zeros((H, W), np.uint8); abox[max(0, top - 115):top + 40, cx - 95:cx + 95] = 1
-        ant = ns & abox
-        ant = cv2.dilate(cv2.morphologyEx(ant, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8)), np.ones((2, 2), np.uint8))
-        return largest(fillh(((core | ant) > 0).astype(np.uint8)))
+    def notblue_mask(b, pad=34):
+        # a colourful object (butterfly) on a textured, painted blue sky. GrabCut with a
+        # trimap keyed to each pixel's CIELab distance from THIS image's local sky colour:
+        #   - sure background : the padded border ring (guaranteed sky)
+        #   - sure foreground : the butterfly's colourful core (far from sky, eroded)
+        #   - probable fg     : everything moderately far from sky
+        # GrabCut then models sky-vs-object colour and returns the whole butterfly as one
+        # piece -- every wing edge and both antennae -- with the sky genuinely transparent.
+        x0, y0, x1, y1 = max(0, b[0]-pad), max(0, b[1]-pad), min(W, b[2]+pad), min(H, b[3]+pad)
+        roi = im[y0:y1, x0:x1]; rf = roi.astype(np.float32)
+        bm = (rf[:, :, 0] > rf[:, :, 2] + 8) & (rf[:, :, 0] > 90)
+        sky = (np.median(roi[bm].reshape(-1, 3), 0) if bm.sum() > 50
+               else np.array([190, 150, 120])).astype(np.uint8)
+        lab = cv2.cvtColor(roi, cv2.COLOR_BGR2LAB).astype(np.float32)
+        skl = cv2.cvtColor(np.uint8([[sky]]), cv2.COLOR_BGR2LAB)[0, 0].astype(np.float32)
+        dist = np.sqrt(((lab - skl) ** 2).sum(2))
+        gc = np.full(roi.shape[:2], cv2.GC_PR_BGD, np.uint8)
+        gc[dist > 22] = cv2.GC_PR_FGD
+        gc[:12, :] = gc[-12:, :] = gc[:, :12] = gc[:, -12:] = cv2.GC_BGD
+        gc[cv2.erode(largest((dist > 34).astype(np.uint8)), np.ones((5, 5), np.uint8)) > 0] = cv2.GC_FGD
+        cv2.grabCut(roi, gc, None, np.zeros((1, 65)), np.zeros((1, 65)), 8, cv2.GC_INIT_WITH_MASK)
+        m = largest(((gc == cv2.GC_FGD) | (gc == cv2.GC_PR_FGD)).astype(np.uint8))
+        m = largest(fillh(m))
+        full = np.zeros((H, W), np.uint8); full[y0:y1, x0:x1] = m
+        return full
     for oid, b, *rest in notblue:
-        objs[oid] = notblue_mask(b, rest[0] if rest else 9)
+        objs[oid] = notblue_mask(b)
     bflies = {}   # id -> (mask, axis_abs)
     for oid, b, axis_frac, *rest in butterflies:
         m = notblue_mask(b, rest[0] if rest else 9)
@@ -153,7 +166,7 @@ if __name__ == "__main__":
     # bounding boxes are (x0, y0, x1, y1) in the spread's own pixels
     extract("cover",
             warm=[("moon", (120, 30, 480, 440)), ("cloud", (1035, 70, 1410, 300))],
-            notblue=[("bfly", (390, 430, 805, 775))],
+            notblue=[("bfly", (392, 432, 782, 778))],
             telea_below=470)
     extract("week1",
             warm=[("moon", (150, 40, 490, 505), 13)],
