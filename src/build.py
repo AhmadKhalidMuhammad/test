@@ -73,14 +73,32 @@ SCENES = [
       living=None, twinkle="sky"),
  dict(id="week1", kind="divider", eyebrow="Week One · Crescent · The Gentle Forms",
       alt="Week One divider. A honey-gold crescent moon with a face hangs in a deep blue sky above a lantern, a candle, a loaf of bread and a butterfly among the flowers.",
-      twinkle="sky",
+      twinkle="sky", flames=[dict(x=64.4, y=80.5, r=2.7, color="#ffce68")],
       living=dict(dir="week1", layers=[
           dict(id="moon",  motion="moon",  depth=0.35, glow="#ffe7a0", glowSize=1.6),
-      ], flames=[dict(x=64.4, y=80.5, r=2.7, color="#ffce68")])),
+      ])),
  dict(id="night1", kind="night", eyebrow="Night One · The Cloud Who Chose a Garden",
-      alt="Night One, The Cloud Who Chose a Garden. A small sleeping cloud settles low over a child asleep in a moonlit garden while other clouds drift high above.",
+      alt="Night One, The Cloud Who Chose a Garden. A small cloud settles low over a child asleep in a moonlit garden, keeping her in cool shade while other clouds race high above.",
       living=None, twinkle=None,
-      rain=[dict(x=62.5, y=52, w=21, h=25, color="#cfe0ff")]),
+      # the cloud does not rain on her: it gives shade and warmth, and watches over her
+      glows=[dict(x=75, y=72, r=17, color="#ffdf9e")]),
+ dict(id="week2", kind="divider", eyebrow="Week Two · First Quarter · The Powerful Forms",
+      alt="Week Two divider. A growing half-moon with a calm face rises over a crown, a compass, a ship, a white tigress and a star among deep-blue waves. This week the small one's work is admiring, and imitating.",
+      twinkle="sky",
+      living=dict(dir="week2", layers=[
+          dict(id="moon", motion="moon", depth=0.35, glow="#ffe7a0", glowSize=1.9),
+      ])),
+ dict(id="week3", kind="divider", eyebrow="Week Three · Full Moon · The Mirror",
+      alt="Week Three divider. A full moon shines through a tall window while a mother and her daughter stand before a mirror and both their faces can be seen. This week the light is at its fullest.",
+      living=None, twinkle="sky",
+      glows=[dict(x=70.8, y=20.5, r=17, color="#fff4d6")],
+      flames=[dict(x=86.7, y=67, r=2.2, color="#ffce68")]),
+ dict(id="week4", kind="divider", eyebrow="Week Four · Waning · The Passing Down",
+      alt="Week Four divider. A waning moon hangs in the window as the mother pours a stream of golden light down into her small daughter's cupped hands, a lantern glowing beside them. This week the light travels; watch where it goes.",
+      living=None, twinkle="sky",
+      glows=[dict(x=68.9, y=19.5, r=12, color="#ffe9b0")],
+      streams=[dict(x=68, y=40, w=5.5, h=30, color="#ffdd7a")],
+      flames=[dict(x=61.6, y=77, r=2.3, color="#ffce68")]),
 ]
 
 # ----------------------------------------------------------------------------
@@ -89,7 +107,8 @@ def build_assets():
     out = []
     for s in SCENES:
         d = dict(id=s["id"], kind=s["kind"], eyebrow=s["eyebrow"], alt=s["alt"],
-                 twinkle=s.get("twinkle"), rain=s.get("rain", []))
+                 twinkle=s.get("twinkle"), flames=s.get("flames", []),
+                 glows=s.get("glows", []), streams=s.get("streams", []))
         living = s.get("living")
         if living and not (ART / living["dir"] / "layers.json").exists():
             print(f"  ! {s['id']}: layers not extracted yet - falling back to flat")
@@ -123,7 +142,6 @@ def build_assets():
                     item["src"] = datauri(ldir / f"{lay['id']}.png", "image/png")
                 L.append(item)
             d["layers"] = L
-            d["flames"] = living.get("flames", [])
         else:
             d["img"] = jpg(s["id"])
         out.append(d)
@@ -204,6 +222,10 @@ body{background:var(--matte); color:var(--ink); font-family:var(--sans);
   45%{opacity:.9; transform:translate(-50%,-52%) scale(1.14)}
   70%{opacity:.7; transform:translate(-50%,-50%) scale(1.05)}}
 
+/* breathing glow (a moon shining through a window, or a cloud's warmth over a child) */
+.glowspot{position:absolute; border-radius:50%; mix-blend-mode:screen; pointer-events:none; z-index:4;
+  transform:translate(-50%,-50%); animation:glowpulse 6.5s ease-in-out infinite}
+@keyframes glowpulse{0%,100%{opacity:.42; transform:translate(-50%,-50%) scale(.95)}50%{opacity:.72; transform:translate(-50%,-50%) scale(1.08)}}
 .twk{position:absolute; inset:0; z-index:4; pointer-events:none}
 .rainc{position:absolute; inset:0; z-index:5; pointer-events:none}
 
@@ -267,7 +289,7 @@ body{background:var(--matte); color:var(--ink); font-family:var(--sans);
 @media (prefers-reduced-motion: reduce){
   #deck{scroll-behavior:auto}
   .stage{transition:opacity .5s linear; transform:none !important}
-  .m-moon,.m-cloudBreathe,.m-cloudDrift,.m-float,.m-sway,.m-butterfly,.part.wing,.halo,.flame,.cue .chev,#veil .moon,#rotate .icn{animation:none !important}
+  .m-moon,.m-cloudBreathe,.m-cloudDrift,.m-float,.m-sway,.m-butterfly,.part.wing,.halo,.flame,.glowspot,.cue .chev,#veil .moon,#rotate .icn{animation:none !important}
 }
 @media (max-width:640px){
   .plate{max-width:96vw}
@@ -321,14 +343,18 @@ SCENES.forEach((s, i) => {
       }
       layer.appendChild(anim); stage.appendChild(layer);
     });
-    (s.flames||[]).forEach(f=>{
-      const fl=el('div','flame',
-        `left:${f.x}%;top:${f.y}%;width:${f.r*2}%;height:${f.r*3.2}%;background:radial-gradient(circle at 50% 60%, #fff3cf, ${f.color} 45%, transparent 72%)`);
-      stage.appendChild(fl);
-    });
   }
+  // overlay effects (work on flat scenes too): flames, breathing glows, falling-light streams
+  (s.flames||[]).forEach(f=>{
+    stage.appendChild(el('div','flame',
+      `left:${f.x}%;top:${f.y}%;width:${f.r*2}%;height:${f.r*3.2}%;background:radial-gradient(circle at 50% 60%, #fff3cf, ${f.color} 45%, transparent 72%)`));
+  });
+  (s.glows||[]).forEach(g=>{
+    stage.appendChild(el('div','glowspot',
+      `left:${g.x}%;top:${g.y}%;width:${g.r}%;aspect-ratio:1;background:radial-gradient(circle, ${g.color}, ${g.color}55 45%, transparent 70%)`));
+  });
   if (s.twinkle){ const c=el('canvas','twk'); stage.appendChild(c); }
-  if (s.rain && s.rain.length){ const rc=el('canvas','rainc'); rc._rain=s.rain; stage.appendChild(rc); }
+  if (s.streams && s.streams.length){ const rc=el('canvas','rainc'); rc._streams=s.streams; stage.appendChild(rc); }
 
   sec.appendChild(stage);
   if (i===0){ const cue=el('div','cue'); cue.id='cue'; cue.innerHTML='Scroll<span class="chev"></span>'; sec.appendChild(cue); }
@@ -350,14 +376,15 @@ document.querySelectorAll('.twk').forEach(c=>{
   const N=reduce?10:16;
   c._stars=Array.from({length:N},()=>({x:Math.random(),y:Math.random()*0.60,r:Math.random()*1.4+0.4,p:Math.random()*6.28,s:0.5+Math.random()}));
 });
-/* ---- rain canvases (drops live in % regions of the stage) ---- */
+/* ---- stream canvases: falling motes of light in % regions of the stage
+       (e.g. Week Four's mother pouring light down into her child's hands) ---- */
 document.querySelectorAll('.rainc').forEach(c=>{
   const st=c.parentElement;
   function size(){ c.width=Math.max(1,st.clientWidth); c.height=Math.max(1,st.clientHeight); }
   size(); new ResizeObserver(size).observe(st);
   c._drops=[];
-  c._rain.forEach(rg=>{ const n=reduce?0:Math.round(rg.w*2.2);
-    for(let k=0;k<n;k++) c._drops.push({rg, x:Math.random(), y:Math.random(), len:6+Math.random()*10, sp:0.006+Math.random()*0.008}); });
+  c._streams.forEach(rg=>{ const n=reduce?0:Math.round(rg.w*4);
+    for(let k=0;k<n;k++) c._drops.push({rg, x:Math.random(), y:Math.random(), r:0.8+Math.random()*1.6, sp:0.004+Math.random()*0.006, ph:Math.random()*6.28}); });
 });
 
 /* ---- active scene ---- */
@@ -422,10 +449,14 @@ function par(){
         x2.globalAlpha*=0.5; x2.fillRect(X-r*3,Y-0.4,r*6,0.8); x2.fillRect(X-0.4,Y-r*3,0.8,r*6); }
       x2.globalAlpha=1; }
     const rc=sc&&sc.querySelector('.rainc');
-    if(rc&&rc._drops&&rc.width>1){ const rx=rc.getContext('2d'); rx.clearRect(0,0,rc.width,rc.height); rx.lineWidth=1.1; rx.lineCap='round';
-      for(const d of rc._drops){ const rg=d.rg; d.y+=d.sp; if(d.y>1){d.y=0;d.x=Math.random();}
-        const X=(rg.x+d.x*rg.w)/100*rc.width, Y=(rg.y+d.y*rg.h)/100*rc.height;
-        rx.strokeStyle=rg.color; rx.globalAlpha=reduce?0:0.5; rx.beginPath(); rx.moveTo(X,Y); rx.lineTo(X-1.5,Y+d.len); rx.stroke(); }
+    if(rc&&rc._drops&&rc.width>1){ const rx=rc.getContext('2d'); rx.clearRect(0,0,rc.width,rc.height);
+      for(const d of rc._drops){ const rg=d.rg; d.y+=d.sp; if(d.y>1){d.y=0;d.x=0.5+(Math.random()-0.5)*0.5;}
+        // taper the column: wider at the top (the pouring hand), narrowing as it falls
+        const spread=rg.w*(0.25+0.75*d.y), cxp=rg.x+rg.w*0.5;
+        const X=(cxp+(d.x-0.5)*spread)/100*rc.width, Y=(rg.y+d.y*rg.h)/100*rc.height;
+        const tw=0.35+0.65*Math.abs(Math.sin(t*0.004*d.sp*160+d.ph));  // sparkle
+        rx.fillStyle=rg.color; rx.globalAlpha=reduce?0:0.85*tw*(1-0.15*d.y);
+        rx.beginPath(); rx.arc(X,Y,d.r*devicePixelRatio*0.8,0,7); rx.fill(); }
       rx.globalAlpha=1; }
     ctx.globalAlpha=1;
     if(!reduce) requestAnimationFrame(frame);

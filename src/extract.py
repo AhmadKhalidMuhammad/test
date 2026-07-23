@@ -90,8 +90,14 @@ def extract(name, warm=(), notblue=(), butterflies=(), telea_below=470):
         objs[oid] = warm_grabcut(b)
     def notblue_mask(b, c):
         sky = ((Hh >= 95) & (Hh <= 140) & (S > 22) & (V > 90)).astype(np.uint8)
-        m = ((1 - sky).astype(np.uint8)) & box(b); m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((c, c), np.uint8))
-        return fillh(largest(m))
+        ns = ((1 - sky).astype(np.uint8)) & box(b)
+        # bridge thin vertical features (e.g. a butterfly's antennae) up to the body,
+        # so they aren't dropped as separate components; a tall thin kernel won't merge
+        # horizontally-separated neighbours like nearby text
+        ns = cv2.morphologyEx(ns, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_RECT, (3, 23)))
+        m = cv2.morphologyEx(ns, cv2.MORPH_CLOSE, np.ones((c, c), np.uint8))
+        m = fillh(largest(m))
+        return largest(cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8)))
     for oid, b, *rest in notblue:
         objs[oid] = notblue_mask(b, rest[0] if rest else 9)
     bflies = {}   # id -> (mask, axis_abs)
@@ -149,4 +155,9 @@ if __name__ == "__main__":
     extract("week1",
             warm=[("moon", (150, 40, 490, 505), 13)],
             telea_below=520)
+    extract("week2",
+            warm=[("moon", (258, 52, 478, 438))],
+            telea_below=460)
+    # week3 (full moon) and week4 (waning crescent) sit small, through a window frame:
+    # they are lit with a breathing glow overlay in build.py rather than cut out.
     print("Done. Now run: python3 src/build.py")

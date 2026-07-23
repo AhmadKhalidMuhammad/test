@@ -24,13 +24,22 @@ Cover → the moon's phases → the living pieces → *Before the First Night* (
 *The First Stories* (the opening myths) → *Week One · Crescent* → **Night One · The Cloud Who Chose a Garden**.
 
 ## The objects come to life
-This is not a slideshow of flat pictures. On the living scenes, each object is a **separate layer**
-that animates on its own: the moon breathes and glows, clouds drift and breathe, the butterfly's
-wings flap, the lantern flickers, rain falls, stars twinkle, gold dust drifts.
+This is not a slideshow of flat pictures. Hero objects are cut out of each spread and animated on
+their own layer, and lighter touches (glows, flames, falling light, twinkles) are painted on top.
 
-Currently alive: the **Cover** (moon, cloud, butterfly) and **Week One** (moon, cloud, lantern
-flame). **Night One** has falling rain. Every night-sky scene has twinkling stars and gold dust.
-The remaining spreads can be brought to life the same way, one at a time.
+The **book intro and all four week introductions** are alive, each matched to what the story means:
+
+- **Cover** — the moon breathes and glows, the cloud sleeps, the butterfly rests among the lilies.
+- **Week One · Crescent** ("the gentle forms") — the crescent moon breathes; the lantern flickers.
+- **Week Two · First Quarter** ("the powerful forms") — the growing half-moon shines a little stronger.
+- **Week Three · Full Moon** ("the mirror") — the full moon glows at its brightest; the lantern flickers.
+- **Week Four · Waning** ("the passing down") — the mother pours a stream of golden light down into
+  her daughter's hands; the waning moon and lantern glow.
+- **Night One** — the little cloud does not rain on the sleeper; it gives her **shade and warmth**,
+  shown as a soft glow watching over her.
+
+Every night-sky scene twinkles, with gold dust drifting throughout. The remaining nights can be
+brought to life the same way, one at a time.
 
 ## For whoever builds the rest (the important part)
 The experience is **data-driven**, so adding or animating scenes does **not** mean rewriting the engine.
