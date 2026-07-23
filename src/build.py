@@ -105,14 +105,24 @@ def build_assets():
             L = []
             for lay in living["layers"]:
                 pos = meta["layers"][lay["id"]]
-                L.append(dict(
+                item = dict(
                     id=lay["id"], motion=lay["motion"], depth=lay.get("depth", 0.5),
-                    split=lay.get("split", False), glow=lay.get("glow"),
-                    glowSize=lay.get("glowSize", 1.4), amp=lay.get("amp", 2.0),
-                    src=datauri(ldir / f"{lay['id']}.png", "image/png"),
+                    glow=lay.get("glow"), glowSize=lay.get("glowSize", 1.4), amp=lay.get("amp", 2.0),
                     x=round(pos["x"]/iw*100, 3), y=round(pos["y"]/ih*100, 3),
                     w=round(pos["w"]/iw*100, 3), h=round(pos["h"]/ih*100, 3),
-                ))
+                )
+                if "parts" in pos:   # composite object (butterfly: wings + body)
+                    lw, lh = pos["w"], pos["h"]
+                    item["parts"] = [dict(
+                        id=pid,
+                        src=datauri(ldir / f"{lay['id']}_{pid}.png", "image/png"),
+                        x=round((pp["x"]-pos["x"])/lw*100, 3), y=round((pp["y"]-pos["y"])/lh*100, 3),
+                        w=round(pp["w"]/lw*100, 3), h=round(pp["h"]/lh*100, 3),
+                        pivot=pp.get("pivot", 50),
+                    ) for pid, pp in ((k, pos["parts"][k]) for k in ("R", "L", "body"))]
+                else:
+                    item["src"] = datauri(ldir / f"{lay['id']}.png", "image/png")
+                L.append(item)
             d["layers"] = L
             d["flames"] = living.get("flames", [])
         else:
@@ -183,14 +193,17 @@ body{background:var(--matte); color:var(--ink); font-family:var(--sans);
 .m-sway{animation:sway 8s ease-in-out infinite; transform-origin:bottom center}
 @keyframes sway{0%,100%{transform:rotate(-.7deg)}50%{transform:rotate(.7deg)}}
 
-/* butterfly: body bob + two wings flapping */
-.m-butterfly{animation:bflyBob 7s ease-in-out infinite}
-@keyframes bflyBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-0.5%)}}
-.wing{position:absolute; inset:0; background-repeat:no-repeat; background-size:100% 100%}
-.wing.l{clip-path:inset(0 49.5% 0 0); transform-origin:right center; animation:flapL .62s ease-in-out infinite}
-.wing.r{clip-path:inset(0 0 0 49.5%); transform-origin:left center; animation:flapR .62s ease-in-out infinite}
-@keyframes flapL{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.9)}}
-@keyframes flapR{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.9)}}
+/* butterfly: gentle whole-body hover; wings foreshorten about the body axis (a flap),
+   while the body stays crisp and still on top */
+.m-butterfly{animation:bflyHover 6.5s ease-in-out infinite}
+@keyframes bflyHover{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-1.5%) rotate(1deg)}}
+.part{position:absolute}
+.part img{position:absolute; inset:0; width:100%; height:100%}
+.part.body{z-index:2}
+.part.wing{z-index:1}
+.part.wing.L{animation:flap .6s ease-in-out infinite}
+.part.wing.R{animation:flap .6s ease-in-out infinite}
+@keyframes flap{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.5)}}
 
 /* flame flicker */
 .flame{position:absolute; border-radius:50%; mix-blend-mode:screen; pointer-events:none; z-index:4;
@@ -262,7 +275,7 @@ body{background:var(--matte); color:var(--ink); font-family:var(--sans);
 @media (prefers-reduced-motion: reduce){
   #deck{scroll-behavior:auto}
   .stage{transition:opacity .5s linear; transform:none !important}
-  .m-moon,.m-cloudBreathe,.m-cloudDrift,.m-float,.m-sway,.m-butterfly,.wing,.halo,.flame,.cue .chev,#veil .moon,#rotate .icn{animation:none !important}
+  .m-moon,.m-cloudBreathe,.m-cloudDrift,.m-float,.m-sway,.m-butterfly,.part.wing,.halo,.flame,.cue .chev,#veil .moon,#rotate .icn{animation:none !important}
 }
 @media (max-width:640px){
   .plate{max-width:96vw}
@@ -297,10 +310,15 @@ SCENES.forEach((s, i) => {
         `left:${L.x}%;top:${L.y}%;width:${L.w}%;height:${L.h}%;z-index:${L.motion==='butterfly'?6:4}`);
       layer.dataset.depth = L.depth;
       const anim = el('div','anim m-'+L.motion);
-      if (L.motion==='butterfly' && L.split){
-        const wl=el('div','wing l'), wr=el('div','wing r');
-        wl.style.backgroundImage='url('+L.src+')'; wr.style.backgroundImage='url('+L.src+')';
-        anim.append(wl,wr);
+      if (L.motion==='butterfly' && L.parts){
+        // three cut pieces: right wing, left wing (both flap in 3D), and a static body
+        L.parts.forEach(pt=>{
+          const cls = pt.id==='body' ? 'part body' : 'part wing '+pt.id;
+          const p = el('div', cls,
+            `left:${pt.x}%;top:${pt.y}%;width:${pt.w}%;height:${pt.h}%;`+
+            (pt.id!=='body' ? `transform-origin:${pt.pivot}% 50%;` : ''));
+          const im=el('img'); im.src=pt.src; im.alt=''; p.appendChild(im); anim.appendChild(p);
+        });
       } else {
         const im=el('img'); im.src=L.src; im.alt=''; anim.appendChild(im);
       }

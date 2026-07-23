@@ -22,7 +22,39 @@ import cv2, numpy as np, json, os, pathlib
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 ART = ROOT / "src" / "art"
 
-def extract(name, warm=(), notblue=(), telea_below=470):
+def _save_sprite(im, mask, path):
+    """Crop the masked region of `im` to a feathered BGRA sprite; return its bbox."""
+    import numpy as np, cv2
+    a = cv2.GaussianBlur((mask * 255).astype(np.uint8), (0, 0), 1.6)
+    yy, xx = np.where(mask > 0)
+    x0, x1, y0, y1 = xx.min(), xx.max() + 1, yy.min(), yy.max() + 1
+    pad = 6; x0 = max(0, x0 - pad); y0 = max(0, y0 - pad)
+    x1 = min(im.shape[1], x1 + pad); y1 = min(im.shape[0], y1 + pad)
+    bgra = cv2.cvtColor(im[y0:y1, x0:x1], cv2.COLOR_BGR2BGRA); bgra[:, :, 3] = a[y0:y1, x0:x1]
+    cv2.imwrite(str(path), bgra)
+    return {"x": int(x0), "y": int(y0), "w": int(x1 - x0), "h": int(y1 - y0)}
+
+def _split_butterfly(im, mask, out, oid, axis_abs):
+    """Split a butterfly mask into left wing, right wing, and a central body strip,
+    each pivoting on the body axis, so the wings can flap in 3D without folding the body."""
+    import numpy as np
+    W = im.shape[1]
+    ys, xs = np.where(mask > 0); x0, x1 = xs.min(), xs.max()
+    bw = int((x1 - x0) * 0.085)                 # body strip half-width
+    ov = int((x1 - x0) * 0.02)                  # wings overlap slightly under the body
+    L = mask.copy(); L[:, axis_abs + ov:] = 0
+    R = mask.copy(); R[:, :axis_abs - ov] = 0
+    B = np.zeros_like(mask); B[:, axis_abs - bw:axis_abs + bw] = mask[:, axis_abs - bw:axis_abs + bw]
+    parts = {}
+    for pid, m in (("L", L), ("R", R), ("body", B)):
+        bb = _save_sprite(im, m, out / f"{oid}_{pid}.png")
+        bb["pivot"] = round((axis_abs - bb["x"]) / bb["w"] * 100, 2)  # axis as % of this part's width
+        parts[pid] = bb
+    whole = {"x": int(xs.min()), "y": int(ys.min()), "w": int(xs.max()-xs.min()+1), "h": int(ys.max()-ys.min()+1)}
+    whole["parts"] = parts
+    return whole
+
+def extract(name, warm=(), notblue=(), butterflies=(), telea_below=470):
     im = cv2.imread(str(ART / f"{name}.jpg")); H, W = im.shape[:2]
     hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
     Hh, S, V = hsv[:, :, 0].astype(int), hsv[:, :, 1].astype(int), hsv[:, :, 2].astype(int)
@@ -42,14 +74,20 @@ def extract(name, warm=(), notblue=(), telea_below=470):
         c = rest[0] if rest else 11
         m = warmM & box(b); m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((c, c), np.uint8))
         m = fillh(largest(m)); objs[oid] = cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
-    for oid, b, *rest in notblue:
-        c = rest[0] if rest else 9
+    def notblue_mask(b, c):
         sky = ((Hh >= 95) & (Hh <= 140) & (S > 22) & (V > 90)).astype(np.uint8)
         m = ((1 - sky).astype(np.uint8)) & box(b); m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((c, c), np.uint8))
-        objs[oid] = fillh(largest(m))
+        return fillh(largest(m))
+    for oid, b, *rest in notblue:
+        objs[oid] = notblue_mask(b, rest[0] if rest else 9)
+    bflies = {}   # id -> (mask, axis_abs)
+    for oid, b, axis_frac, *rest in butterflies:
+        m = notblue_mask(b, rest[0] if rest else 9)
+        bflies[oid] = (m, int(b[0] + axis_frac * (b[2] - b[0])))
 
     union = np.zeros((H, W), np.uint8)
     for m in objs.values(): union |= m
+    for m, _ in bflies.values(): union |= m
     uni_d = cv2.dilate(union, np.ones((15, 15), np.uint8))
 
     # smooth 2D polynomial sky fit (no banding), used for holes in the upper sky
@@ -81,6 +119,8 @@ def extract(name, warm=(), notblue=(), telea_below=470):
         bgra = cv2.cvtColor(im[y0:y1, x0:x1], cv2.COLOR_BGR2BGRA); bgra[:, :, 3] = a[y0:y1, x0:x1]
         cv2.imwrite(str(out / f"{nm}.png"), bgra)
         meta["layers"][nm] = {"x": int(x0), "y": int(y0), "w": int(x1 - x0), "h": int(y1 - y0)}
+    for oid, (m, axis_abs) in bflies.items():
+        meta["layers"][oid] = _split_butterfly(im, m, out, oid, axis_abs)
     json.dump(meta, open(out / "layers.json", "w"), indent=1)
     print(f"  {name}: {list(meta['layers'])}")
 
@@ -90,7 +130,7 @@ if __name__ == "__main__":
     # bounding boxes are (x0, y0, x1, y1) in the spread's own pixels
     extract("cover",
             warm=[("moon", (120, 30, 480, 440)), ("cloud", (1035, 70, 1410, 300))],
-            notblue=[("bfly", (390, 430, 805, 775))],
+            butterflies=[("bfly", (390, 430, 805, 775), 0.477)],   # axis_frac = body centreline
             telea_below=470)
     extract("week1",
             warm=[("moon", (150, 40, 490, 505), 13), ("cloud", (12, 545, 305, 712), 9)],
