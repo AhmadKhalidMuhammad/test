@@ -20,7 +20,8 @@ boxes (find them by eye on the spread), then re-run this and build.py.
 import cv2, numpy as np, json, os, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-ART = ROOT / "src" / "art"
+SOURCES = ROOT / "assets" / "sources"
+PAGES = ROOT / "assets" / "pages"
 
 def _save_sprite(im, mask, path):
     """Crop the masked region of `im` to a feathered BGRA sprite; return its bbox."""
@@ -55,7 +56,7 @@ def _split_butterfly(im, mask, out, oid, axis_abs):
     return whole
 
 def extract(name, warm=(), notblue=(), butterflies=(), telea_below=470):
-    im = cv2.imread(str(ART / f"{name}.jpg")); H, W = im.shape[:2]
+    im = cv2.imread(str(SOURCES / f"{name}.jpg")); H, W = im.shape[:2]
     hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
     Hh, S, V = hsv[:, :, 0].astype(int), hsv[:, :, 1].astype(int), hsv[:, :, 2].astype(int)
 
@@ -131,15 +132,15 @@ def extract(name, warm=(), notblue=(), butterflies=(), telea_below=470):
     usef = (uni_d.astype(np.float32) * band)[..., None]
     plate = (field * usef + telea * (1 - usef)).astype(np.uint8)
 
-    out = ART / name; out.mkdir(exist_ok=True)
-    cv2.imwrite(str(out / "plate.jpg"), plate, [cv2.IMWRITE_JPEG_QUALITY, 92])
+    out = PAGES / name; out.mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(str(out / "background.jpg"), plate, [cv2.IMWRITE_JPEG_QUALITY, 92])
     meta = {"w": W, "h": H, "layers": {}}
     for nm, m in objs.items():
         a = cv2.GaussianBlur((cv2.erode(m, np.ones((2, 2), np.uint8)) * 255).astype(np.uint8), (0, 0), 0.9)
         yy, xx = np.where(m > 0); x0, x1, y0, y1 = xx.min(), xx.max() + 1, yy.min(), yy.max() + 1
         pad = 6; x0 = max(0, x0 - pad); y0 = max(0, y0 - pad); x1 = min(W, x1 + pad); y1 = min(H, y1 + pad)
         bgra = cv2.cvtColor(im[y0:y1, x0:x1], cv2.COLOR_BGR2BGRA); bgra[:, :, 3] = a[y0:y1, x0:x1]
-        cv2.imwrite(str(out / f"{nm}.png"), bgra)
+        cv2.imwrite(str(out / f"obj-{nm}.png"), bgra)
         meta["layers"][nm] = {"x": int(x0), "y": int(y0), "w": int(x1 - x0), "h": int(y1 - y0)}
     for oid, (m, axis_abs) in bflies.items():
         meta["layers"][oid] = _split_butterfly(im, m, out, oid, axis_abs)

@@ -1,0 +1,222 @@
+{
+  "title": "The Twenty-Eight Nights",
+  "pages": [
+    {
+      "id": "cover",
+      "kind": "cover",
+      "eyebrow": "",
+      "alt": "Cover. A honey-gold crescent moon with a gentle face and a sleeping cloud float over white lilies and an ornamental butterfly on a deep indigo night.",
+      "objects": [
+        {
+          "id": "moon",
+          "motion": "moon",
+          "depth": 0.35,
+          "glow": "#ffe7a0",
+          "glowSize": 1.5
+        },
+        {
+          "id": "cloud",
+          "motion": "cloudBreathe",
+          "depth": 0.55
+        },
+        {
+          "id": "bfly",
+          "motion": "butterfly",
+          "depth": 1.25
+        }
+      ],
+      "twinkle": "sky",
+      "text": []
+    },
+    {
+      "id": "phasearc",
+      "kind": "atmos",
+      "eyebrow": "The moon has twenty-eight faces",
+      "alt": "All twenty-eight phases of the moon arc across the night sky above a garden of lilies, with a sleeping cloud at the left.",
+      "objects": [],
+      "twinkle": "sky",
+      "text": []
+    },
+    {
+      "id": "elements",
+      "kind": "spread",
+      "eyebrow": "The living pieces",
+      "alt": "A cast sheet of the book's living pieces: moon faces through their phases, ornamental butterflies, clouds that are happy, sleeping, and raining, and a border of flowers.",
+      "objects": [],
+      "text": []
+    },
+    {
+      "id": "foreword1",
+      "kind": "spread",
+      "eyebrow": "Before the First Night",
+      "alt": "An open book rests in a moonlit garden, holding a crown, a lantern, a ship's wheel, a small blue book and a butterfly, while three moon faces drift above it.",
+      "objects": [],
+      "twinkle": "sky",
+      "text": []
+    },
+    {
+      "id": "foreword2",
+      "kind": "spread",
+      "eyebrow": "Before the First Night",
+      "alt": "The mother in her long indigo robe holds her small daughter's hand and they walk together toward a closed book, a crescent moon above and a butterfly nearby.",
+      "objects": [],
+      "twinkle": "sky",
+      "text": []
+    },
+    {
+      "id": "firststories",
+      "kind": "divider",
+      "eyebrow": "The First Stories",
+      "alt": "Section title: The First Stories, from before anyone counted nights. A small crescent moon with a face and a butterfly rest among lilies on cream.",
+      "objects": [],
+      "text": []
+    },
+    {
+      "id": "butterfly_moon",
+      "kind": "spread",
+      "eyebrow": "The First Stories",
+      "alt": "The Butterfly and the Moon. A butterfly lifts from a white lily as a thread of light crosses to a crescent moon on the right of the spread.",
+      "objects": [],
+      "twinkle": "sky",
+      "text": []
+    },
+    {
+      "id": "storyhour",
+      "kind": "spread",
+      "eyebrow": "The First Stories",
+      "alt": "The Story Hour. In the grey hour just before morning, the crescent moon leans low over a sleeping garden while a butterfly rests among giant lilies.",
+      "objects": [],
+      "twinkle": "sky",
+      "text": []
+    },
+    {
+      "id": "moonchanges",
+      "kind": "spread",
+      "eyebrow": "The First Stories",
+      "alt": "Why the Moon Changes Shape. A row of moon faces shrinks from full to crescent across the sky, giving pieces of light away to the stars.",
+      "objects": [],
+      "twinkle": "sky",
+      "text": []
+    },
+    {
+      "id": "butterflycolors",
+      "kind": "spread",
+      "eyebrow": "The First Stories",
+      "alt": "The Butterfly's Colors. A large ornamental butterfly glows above a sunrise-tinted garden, its wings coloured by the moon before the dew ever flew.",
+      "objects": [],
+      "text": []
+    },
+    {
+      "id": "moonsfavorite",
+      "kind": "spread",
+      "eyebrow": "The First Stories",
+      "alt": "The Moon's Favorite. A great full moon with a serene face smiles near morning while small stars climb toward it down beams of light.",
+      "objects": [],
+      "twinkle": "sky",
+      "text": []
+    },
+    {
+      "id": "week1",
+      "kind": "divider",
+      "eyebrow": "Week One \u00b7 Crescent \u00b7 The Gentle Forms",
+      "alt": "Week One divider. A honey-gold crescent moon with a face hangs in a deep blue sky above a lantern, a candle, a loaf of bread and a butterfly among the flowers.",
+      "objects": [],
+      "moonMorph": true,
+      "flames": [
+        {
+          "x": 64.4,
+          "y": 80.5,
+          "r": 2.7,
+          "color": "#ffce68"
+        }
+      ],
+      "twinkle": "sky",
+      "text": []
+    },
+    {
+      "id": "week2",
+      "kind": "divider",
+      "eyebrow": "Week Two \u00b7 First Quarter \u00b7 The Powerful Forms",
+      "alt": "Week Two divider. A growing half-moon with a calm face rises over a crown, a compass, a ship, a white tigress and a star among deep-blue waves. This week the small one's work is admiring, and imitating.",
+      "objects": [],
+      "moonMorph": true,
+      "twinkle": "sky",
+      "text": []
+    },
+    {
+      "id": "week3",
+      "kind": "divider",
+      "eyebrow": "Week Three \u00b7 Full Moon \u00b7 The Mirror",
+      "alt": "Week Three divider. A full moon shines through a tall window while a mother and her daughter stand before a mirror and both their faces can be seen. This week the light is at its fullest.",
+      "objects": [],
+      "flames": [
+        {
+          "x": 86.7,
+          "y": 67,
+          "r": 2.2,
+          "color": "#ffce68"
+        }
+      ],
+      "glows": [
+        {
+          "x": 70.8,
+          "y": 20.5,
+          "r": 17,
+          "color": "#fff4d6"
+        }
+      ],
+      "twinkle": "sky",
+      "text": []
+    },
+    {
+      "id": "week4",
+      "kind": "divider",
+      "eyebrow": "Week Four \u00b7 Waning \u00b7 The Passing Down",
+      "alt": "Week Four divider. A waning moon hangs in the window as the mother pours a stream of golden light down into her small daughter's cupped hands, a lantern glowing beside them. This week the light travels; watch where it goes.",
+      "objects": [],
+      "flames": [
+        {
+          "x": 61.6,
+          "y": 77,
+          "r": 2.3,
+          "color": "#ffce68"
+        }
+      ],
+      "glows": [
+        {
+          "x": 68.9,
+          "y": 19.5,
+          "r": 12,
+          "color": "#ffe9b0"
+        }
+      ],
+      "streams": [
+        {
+          "x": 68,
+          "y": 40,
+          "w": 5.5,
+          "h": 30,
+          "color": "#ffdd7a"
+        }
+      ],
+      "twinkle": "sky",
+      "text": []
+    },
+    {
+      "id": "night1",
+      "kind": "night",
+      "eyebrow": "Night One \u00b7 The Cloud Who Chose a Garden",
+      "alt": "Night One, The Cloud Who Chose a Garden. A small cloud settles low over a child asleep in a moonlit garden, keeping her in cool shade while other clouds race high above.",
+      "objects": [],
+      "glows": [
+        {
+          "x": 75,
+          "y": 72,
+          "r": 17,
+          "color": "#ffdf9e"
+        }
+      ],
+      "text": []
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+<title>The Twenty-Eight Nights</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="The Twenty-Eight Nights - an interactive bedtime story that follows the moon.">
+<style>/*STYLES*/</style>
+
+<div id="deck" aria-label="The Twenty-Eight Nights, scene by scene"></div>
+<canvas id="dust" aria-hidden="true"></canvas>
+
+<div class="chrome topbar">
+  <div class="brand"><span class="cres"></span><span class="full">The Twenty-Eight Nights</span></div>
+  <button class="tbtn" id="theme" type="button" aria-label="Switch between night and day">Night · Day</button>
+</div>
+<div class="chrome rail" id="rail" role="navigation" aria-label="Jump to a scene"></div>
+<div class="chrome readout" id="readout" aria-live="polite"></div>
+<div id="rotate" class="chrome"><span class="icn" aria-hidden="true"></span>Turn your device sideways to read</div>
+<div class="chrome arrows">
+  <button class="arrow up" id="up" type="button" aria-label="Previous scene" hidden><i></i></button>
+  <button class="arrow down" id="down" type="button" aria-label="Next scene"><i></i></button>
+</div>
+
+<div id="veil">
+  <div class="in">
+    <div class="moon" aria-hidden="true"></div>
+    <div class="eb">An interactive bedtime book</div>
+    <h1>The Twenty-Eight Nights</h1>
+    <p>A story for every night the moon has.</p>
+    <button class="begin" id="beginBtn" type="button">Begin</button>
+    <div class="hint">Scroll, tap the arrows, or use your keyboard. Best in a dark, quiet room.</div>
+  </div>
+</div>
+
+<script>/*ENGINE*/</script>
