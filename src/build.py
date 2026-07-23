@@ -39,7 +39,7 @@ SCENES = [
       living=dict(dir="cover", layers=[
           dict(id="moon",  motion="moon",      depth=0.35, glow="#ffe7a0", glowSize=1.5),
           dict(id="cloud", motion="cloudBreathe", depth=0.55),
-          dict(id="bfly",  motion="butterfly", depth=1.25, split=True),
+          dict(id="bfly",  motion="butterfly", depth=1.25),
       ])),
  dict(id="phasearc", kind="atmos", eyebrow="The moon has twenty-eight faces",
       alt="All twenty-eight phases of the moon arc across the night sky above a garden of lilies, with a sleeping cloud at the left.",
@@ -76,7 +76,6 @@ SCENES = [
       twinkle="sky",
       living=dict(dir="week1", layers=[
           dict(id="moon",  motion="moon",  depth=0.35, glow="#ffe7a0", glowSize=1.6),
-          dict(id="cloud", motion="cloudBreathe", depth=0.5),
       ], flames=[dict(x=64.4, y=80.5, r=2.7, color="#ffce68")])),
  dict(id="night1", kind="night", eyebrow="Night One · The Cloud Who Chose a Garden",
       alt="Night One, The Cloud Who Chose a Garden. A small sleeping cloud settles low over a child asleep in a moonlit garden while other clouds drift high above.",
@@ -193,17 +192,10 @@ body{background:var(--matte); color:var(--ink); font-family:var(--sans);
 .m-sway{animation:sway 8s ease-in-out infinite; transform-origin:bottom center}
 @keyframes sway{0%,100%{transform:rotate(-.7deg)}50%{transform:rotate(.7deg)}}
 
-/* butterfly: gentle whole-body hover; wings foreshorten about the body axis (a flap),
-   while the body stays crisp and still on top */
-.m-butterfly{animation:bflyHover 6.5s ease-in-out infinite}
-@keyframes bflyHover{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-1.5%) rotate(1deg)}}
-.part{position:absolute}
-.part img{position:absolute; inset:0; width:100%; height:100%}
-.part.body{z-index:2}
-.part.wing{z-index:1}
-.part.wing.L{animation:flap .6s ease-in-out infinite}
-.part.wing.R{animation:flap .6s ease-in-out infinite}
-@keyframes flap{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.5)}}
+/* butterfly: for now a whole, rigid sprite with only a barely-there resting drift
+   (its flap is being redesigned; this keeps it alive without distorting the art) */
+.m-butterfly{animation:bflyRest 8s ease-in-out infinite}
+@keyframes bflyRest{0%,100%{transform:translateY(0) rotate(-0.6deg)}50%{transform:translateY(-0.8%) rotate(0.6deg)}}
 
 /* flame flicker */
 .flame{position:absolute; border-radius:50%; mix-blend-mode:screen; pointer-events:none; z-index:4;

@@ -68,12 +68,26 @@ def extract(name, warm=(), notblue=(), butterflies=(), telea_below=470):
         inv = (1 - ff).astype(np.uint8); cv2.floodFill(inv, mm, (0, 0), 0)
         return ((ff > 0) | (inv > 0)).astype(np.uint8)
 
-    warmM = ((((Hh < 90) | (Hh > 150)) | (S < 45)) & (V > 108)).astype(np.uint8)
+    def warm_grabcut(b, pad=22, iters=7):
+        """Clean cut of a warm/cream object (moon, cloud) off blue sky, using GrabCut
+        with strongly-blue pixels marked as definite background."""
+        x0, y0, x1, y1 = max(0, b[0]-pad), max(0, b[1]-pad), min(W, b[2]+pad), min(H, b[3]+pad)
+        roi = im[y0:y1, x0:x1]; hs = hsv[y0:y1, x0:x1]
+        h, s, v = hs[:, :, 0].astype(int), hs[:, :, 1].astype(int), hs[:, :, 2].astype(int)
+        warm = (((h < 86) | (h > 150)) | (s < 40)) & (v > 120)
+        blue = (h >= 92) & (h <= 140) & (s > 45)
+        gc = np.full(roi.shape[:2], cv2.GC_PR_BGD, np.uint8)
+        gc[blue] = cv2.GC_BGD
+        core = cv2.erode(largest(fillh((warm & ~blue).astype(np.uint8))), np.ones((5, 5), np.uint8))
+        gc[warm & ~blue] = cv2.GC_PR_FGD
+        gc[core > 0] = cv2.GC_FGD
+        cv2.grabCut(roi, gc, None, np.zeros((1, 65)), np.zeros((1, 65)), iters, cv2.GC_INIT_WITH_MASK)
+        ref = largest(fillh(((gc == cv2.GC_FGD) | (gc == cv2.GC_PR_FGD)).astype(np.uint8)))
+        ref = largest(cv2.morphologyEx(ref, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8)))
+        full = np.zeros((H, W), np.uint8); full[y0:y1, x0:x1] = ref; return full
     objs = {}
     for oid, b, *rest in warm:
-        c = rest[0] if rest else 11
-        m = warmM & box(b); m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((c, c), np.uint8))
-        m = fillh(largest(m)); objs[oid] = cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+        objs[oid] = warm_grabcut(b)
     def notblue_mask(b, c):
         sky = ((Hh >= 95) & (Hh <= 140) & (S > 22) & (V > 90)).astype(np.uint8)
         m = ((1 - sky).astype(np.uint8)) & box(b); m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((c, c), np.uint8))
@@ -113,7 +127,7 @@ def extract(name, warm=(), notblue=(), butterflies=(), telea_below=470):
     cv2.imwrite(str(out / "plate.jpg"), plate, [cv2.IMWRITE_JPEG_QUALITY, 92])
     meta = {"w": W, "h": H, "layers": {}}
     for nm, m in objs.items():
-        a = cv2.GaussianBlur((m * 255).astype(np.uint8), (0, 0), 1.6)
+        a = cv2.GaussianBlur((cv2.erode(m, np.ones((2, 2), np.uint8)) * 255).astype(np.uint8), (0, 0), 0.9)
         yy, xx = np.where(m > 0); x0, x1, y0, y1 = xx.min(), xx.max() + 1, yy.min(), yy.max() + 1
         pad = 6; x0 = max(0, x0 - pad); y0 = max(0, y0 - pad); x1 = min(W, x1 + pad); y1 = min(H, y1 + pad)
         bgra = cv2.cvtColor(im[y0:y1, x0:x1], cv2.COLOR_BGR2BGRA); bgra[:, :, 3] = a[y0:y1, x0:x1]
@@ -130,9 +144,9 @@ if __name__ == "__main__":
     # bounding boxes are (x0, y0, x1, y1) in the spread's own pixels
     extract("cover",
             warm=[("moon", (120, 30, 480, 440)), ("cloud", (1035, 70, 1410, 300))],
-            butterflies=[("bfly", (390, 430, 805, 775), 0.477)],   # axis_frac = body centreline
+            notblue=[("bfly", (390, 430, 805, 775))],
             telea_below=470)
     extract("week1",
-            warm=[("moon", (150, 40, 490, 505), 13), ("cloud", (12, 545, 305, 712), 9)],
+            warm=[("moon", (150, 40, 490, 505), 13)],
             telea_below=520)
     print("Done. Now run: python3 src/build.py")
