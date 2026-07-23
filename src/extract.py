@@ -89,15 +89,17 @@ def extract(name, warm=(), notblue=(), butterflies=(), telea_below=470):
     for oid, b, *rest in warm:
         objs[oid] = warm_grabcut(b)
     def notblue_mask(b, c):
-        sky = ((Hh >= 95) & (Hh <= 140) & (S > 22) & (V > 90)).astype(np.uint8)
+        # a colourful object (butterfly) on blue sky. Cut a clean solid silhouette first
+        # (largest component -> no nearby text, no edge bleed), then reconnect thin
+        # antennae only in a small box just above the head so they aren't dropped.
+        sky = ((Hh >= 95) & (Hh <= 140) & (S > 25) & (V > 100)).astype(np.uint8)
         ns = ((1 - sky).astype(np.uint8)) & box(b)
-        # bridge thin vertical features (e.g. a butterfly's antennae) up to the body,
-        # so they aren't dropped as separate components; a tall thin kernel won't merge
-        # horizontally-separated neighbours like nearby text
-        ns = cv2.morphologyEx(ns, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_RECT, (3, 23)))
-        m = cv2.morphologyEx(ns, cv2.MORPH_CLOSE, np.ones((c, c), np.uint8))
-        m = fillh(largest(m))
-        return largest(cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8)))
+        core = largest(fillh(cv2.morphologyEx(ns, cv2.MORPH_CLOSE, np.ones((c, c), np.uint8))))
+        ys, xs = np.where(core > 0); cx = int(xs.mean()); top = int(ys.min())
+        abox = np.zeros((H, W), np.uint8); abox[max(0, top - 115):top + 40, cx - 95:cx + 95] = 1
+        ant = ns & abox
+        ant = cv2.dilate(cv2.morphologyEx(ant, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8)), np.ones((2, 2), np.uint8))
+        return largest(fillh(((core | ant) > 0).astype(np.uint8)))
     for oid, b, *rest in notblue:
         objs[oid] = notblue_mask(b, rest[0] if rest else 9)
     bflies = {}   # id -> (mask, axis_abs)

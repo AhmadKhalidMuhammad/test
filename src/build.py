@@ -71,23 +71,17 @@ SCENES = [
  dict(id="moonsfavorite", kind="spread", eyebrow="The First Stories",
       alt="The Moon's Favorite. A great full moon with a serene face smiles near morning while small stars climb toward it down beams of light.",
       living=None, twinkle="sky"),
+ # Week One -> Week Two share one moon that MORPHS between them (crescent -> first
+ # quarter): a single moon element glides and grows across the page turn, PowerPoint
+ # "Morph"-style. Their plates have the moon painted out; the moon is the overlay below.
  dict(id="week1", kind="divider", eyebrow="Week One · Crescent · The Gentle Forms",
       alt="Week One divider. A honey-gold crescent moon with a face hangs in a deep blue sky above a lantern, a candle, a loaf of bread and a butterfly among the flowers.",
       twinkle="sky", flames=[dict(x=64.4, y=80.5, r=2.7, color="#ffce68")],
-      living=dict(dir="week1", layers=[
-          dict(id="moon",  motion="moon",  depth=0.35, glow="#ffe7a0", glowSize=1.6),
-      ])),
- dict(id="night1", kind="night", eyebrow="Night One · The Cloud Who Chose a Garden",
-      alt="Night One, The Cloud Who Chose a Garden. A small cloud settles low over a child asleep in a moonlit garden, keeping her in cool shade while other clouds race high above.",
-      living=None, twinkle=None,
-      # the cloud does not rain on her: it gives shade and warmth, and watches over her
-      glows=[dict(x=75, y=72, r=17, color="#ffdf9e")]),
+      moonMorph=True, living=dict(dir="week1", layers=[])),
  dict(id="week2", kind="divider", eyebrow="Week Two · First Quarter · The Powerful Forms",
       alt="Week Two divider. A growing half-moon with a calm face rises over a crown, a compass, a ship, a white tigress and a star among deep-blue waves. This week the small one's work is admiring, and imitating.",
       twinkle="sky",
-      living=dict(dir="week2", layers=[
-          dict(id="moon", motion="moon", depth=0.35, glow="#ffe7a0", glowSize=1.9),
-      ])),
+      moonMorph=True, living=dict(dir="week2", layers=[])),
  dict(id="week3", kind="divider", eyebrow="Week Three · Full Moon · The Mirror",
       alt="Week Three divider. A full moon shines through a tall window while a mother and her daughter stand before a mirror and both their faces can be seen. This week the light is at its fullest.",
       living=None, twinkle="sky",
@@ -99,6 +93,11 @@ SCENES = [
       glows=[dict(x=68.9, y=19.5, r=12, color="#ffe9b0")],
       streams=[dict(x=68, y=40, w=5.5, h=30, color="#ffdd7a")],
       flames=[dict(x=61.6, y=77, r=2.3, color="#ffce68")]),
+ dict(id="night1", kind="night", eyebrow="Night One · The Cloud Who Chose a Garden",
+      alt="Night One, The Cloud Who Chose a Garden. A small cloud settles low over a child asleep in a moonlit garden, keeping her in cool shade while other clouds race high above.",
+      living=None, twinkle=None,
+      # the cloud does not rain on her: it gives shade and warmth, and watches over her
+      glows=[dict(x=75, y=72, r=17, color="#ffdf9e")]),
 ]
 
 # ----------------------------------------------------------------------------
@@ -142,6 +141,12 @@ def build_assets():
                     item["src"] = datauri(ldir / f"{lay['id']}.png", "image/png")
                 L.append(item)
             d["layers"] = L
+            if s.get("moonMorph"):
+                p = meta["layers"]["moon"]
+                d["moonMorph"] = dict(
+                    src=datauri(ldir / "moon.png", "image/png"),
+                    x=round(p["x"]/iw*100, 3), y=round(p["y"]/ih*100, 3),
+                    w=round(p["w"]/iw*100, 3), h=round(p["h"]/ih*100, 3))
         else:
             d["img"] = jpg(s["id"])
         out.append(d)
@@ -228,6 +233,15 @@ body{background:var(--matte); color:var(--ink); font-family:var(--sans);
 @keyframes glowpulse{0%,100%{opacity:.42; transform:translate(-50%,-50%) scale(.95)}50%{opacity:.72; transform:translate(-50%,-50%) scale(1.08)}}
 .twk{position:absolute; inset:0; z-index:4; pointer-events:none}
 .rainc{position:absolute; inset:0; z-index:5; pointer-events:none}
+
+/* the morphing moon: one moon element that glides + grows + changes phase across a
+   page turn (Week One crescent -> Week Two first quarter), PowerPoint "Morph"-style */
+#morphmoon{position:fixed; z-index:6; pointer-events:none; opacity:0;
+  transition:left 1.05s var(--ease), top 1.05s var(--ease), width 1.05s var(--ease), opacity .7s var(--ease);
+  filter:drop-shadow(0 0 26px rgba(255,231,160,.5))}
+#morphmoon.nofade{transition:opacity .7s var(--ease)}
+#morphmoon img{position:absolute; left:0; top:0; width:100%; height:auto; opacity:0; transition:opacity 1.05s var(--ease)}
+#morphmoon img.on{opacity:1}
 
 #dust{position:fixed; inset:0; z-index:40; pointer-events:none}
 
@@ -368,6 +382,23 @@ SCENES.forEach((s, i) => {
 const sceneEls=[...deck.querySelectorAll('.scene')];
 const dots=[...rail.querySelectorAll('button')];
 
+/* ---- the morphing moon (shared across the Week One -> Week Two page turn) ---- */
+const morphEl=el('div'); morphEl.id='morphmoon'; const morphImgs={};
+SCENES.forEach((s,i)=>{ if(s.moonMorph){ const im=el('img'); im.src=s.moonMorph.src; im.alt=''; morphEl.appendChild(im); morphImgs[i]=im; }});
+document.body.appendChild(morphEl);
+let prevMorph=false, morphCur=-1;
+function restRect(A){ const vw=innerWidth, vh=innerHeight; const maxW=Math.min(0.96*vw,1480), maxH=0.86*vh;
+  const w=Math.min(maxW, maxH*A); return {left:(vw-w)/2, top:(vh-w/A)/2, w, h:w/A}; }
+function positionMorph(i, animate){
+  const mm=SCENES[i].moonMorph, rr=restRect(SCENES[i].aspect);
+  if(!animate) morphEl.classList.add('nofade');
+  morphEl.style.left=(rr.left+mm.x/100*rr.w)+'px';
+  morphEl.style.top=(rr.top+mm.y/100*rr.h)+'px';
+  morphEl.style.width=(mm.w/100*rr.w)+'px';
+  if(!animate){ morphEl.getBoundingClientRect(); morphEl.classList.remove('nofade'); }
+  for(const k in morphImgs) morphImgs[k].classList.toggle('on', +k===i);
+}
+
 /* ---- twinkle canvases (per scene sky) ---- */
 document.querySelectorAll('.twk').forEach(c=>{
   const st=c.parentElement;
@@ -399,7 +430,10 @@ function setActive(i){
   const cue=document.getElementById('cue'); if(cue) cue.style.opacity=i===0?'':'0';
   document.getElementById('up').hidden=i===0;
   document.getElementById('down').hidden=(i===0)||(i===sceneEls.length-1);
+  if(s.moonMorph){ positionMorph(i, prevMorph); morphEl.style.opacity=1; prevMorph=true; morphCur=i; }
+  else { morphEl.style.opacity=0; prevMorph=false; morphCur=-1; }
 }
+addEventListener('resize',()=>{ if(morphCur>=0) positionMorph(morphCur,false); });
 const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting&&e.intersectionRatio>=0.55) setActive(+e.target.dataset.i); }),{root:deck,threshold:[0.55]});
 sceneEls.forEach(e=>io.observe(e)); setActive(0);
 
