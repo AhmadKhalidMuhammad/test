@@ -55,6 +55,19 @@ SCENES.forEach((s, i) => {
   if (s.twinkle){ const c=el('canvas','twk'); stage.appendChild(c); }
   if (s.streams && s.streams.length){ const rc=el('canvas','rainc'); rc._streams=s.streams; stage.appendChild(rc); }
 
+  // live text (re-typeset from content, never baked into the art)
+  if (s.content && s.textbox){
+    const tb=s.textbox, c=s.content;
+    const tl=el('div','textlayer',`left:${tb.x}%;top:${tb.y}%;width:${tb.w}%;height:${tb.h}%`);
+    if (c.eyebrow) tl.appendChild(el('div','tl-eyebrow')).textContent=c.eyebrow;
+    if (c.title){ const h=el('div','tl-title'); h.textContent=c.title; tl.appendChild(h); }
+    const body=el('div','tl-body');
+    (c.body||[]).forEach(par=>{ const p=el('p'); p.textContent=par; body.appendChild(p); });
+    tl.appendChild(body);
+    if (c.coda){ const cd=el('div','tl-coda'); cd.textContent=c.coda; tl.appendChild(cd); }
+    stage.appendChild(tl);
+  }
+
   sec.appendChild(stage);
   if (i===0){ const cue=el('div','cue'); cue.id='cue'; cue.innerHTML='Scroll<span class="chev"></span>'; sec.appendChild(cue); }
   deck.appendChild(sec);
@@ -110,15 +123,22 @@ function setActive(i){
   sceneEls.forEach((e,k)=>e.classList.toggle('active',k===i));
   dots.forEach((d,k)=>d.setAttribute('aria-current',k===i?'true':'false'));
   const s=SCENES[i];
-  if(s.eyebrow){ readout.innerHTML='<span class="eb">'+s.eyebrow+'</span>'; readout.classList.add('show'); }
+  if(s.eyebrow && !s.content){ readout.innerHTML='<span class="eb">'+s.eyebrow+'</span>'; readout.classList.add('show'); }
   else readout.classList.remove('show');
   const cue=document.getElementById('cue'); if(cue) cue.style.opacity=i===0?'':'0';
   document.getElementById('up').hidden=i===0;
   document.getElementById('down').hidden=(i===0)||(i===sceneEls.length-1);
   if(s.moonMorph){ positionMorph(i, prevMorph); morphEl.style.opacity=1; prevMorph=true; morphCur=i; }
   else { morphEl.style.opacity=0; prevMorph=false; morphCur=-1; }
+  setStageUnit(i);
 }
-addEventListener('resize',()=>{ if(morphCur>=0) positionMorph(morphCur,false); });
+// --u = 1% of the stage's rendered width, so live text scales with the art
+function setStageUnit(i){
+  const st=sceneEls[i].querySelector('.stage'); if(!st) return;
+  const rr=restRect(SCENES[i].aspect||2.588);
+  st.style.setProperty('--u', (rr.w/100)+'px');
+}
+addEventListener('resize',()=>{ if(morphCur>=0) positionMorph(morphCur,false); if(current>=0) setStageUnit(current); });
 const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting&&e.intersectionRatio>=0.55) setActive(+e.target.dataset.i); }),{root:deck,threshold:[0.55]});
 sceneEls.forEach(e=>io.observe(e)); setActive(0);
 

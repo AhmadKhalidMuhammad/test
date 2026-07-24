@@ -118,7 +118,7 @@
     {
       "id": "week1",
       "kind": "divider",
-      "eyebrow": "Week One \u00b7 Crescent \u00b7 The Gentle Forms",
+      "eyebrow": "Week One · Crescent · The Gentle Forms",
       "alt": "Week One divider. A honey-gold crescent moon with a face hangs in a deep blue sky above a lantern, a candle, a loaf of bread and a butterfly among the flowers.",
       "objects": [],
       "moonMorph": true,
@@ -136,7 +136,7 @@
     {
       "id": "week2",
       "kind": "divider",
-      "eyebrow": "Week Two \u00b7 First Quarter \u00b7 The Powerful Forms",
+      "eyebrow": "Week Two · First Quarter · The Powerful Forms",
       "alt": "Week Two divider. A growing half-moon with a calm face rises over a crown, a compass, a ship, a white tigress and a star among deep-blue waves. This week the small one's work is admiring, and imitating.",
       "objects": [],
       "moonMorph": true,
@@ -146,7 +146,7 @@
     {
       "id": "week3",
       "kind": "divider",
-      "eyebrow": "Week Three \u00b7 Full Moon \u00b7 The Mirror",
+      "eyebrow": "Week Three · Full Moon · The Mirror",
       "alt": "Week Three divider. A full moon shines through a tall window while a mother and her daughter stand before a mirror and both their faces can be seen. This week the light is at its fullest.",
       "objects": [],
       "flames": [
@@ -171,7 +171,7 @@
     {
       "id": "week4",
       "kind": "divider",
-      "eyebrow": "Week Four \u00b7 Waning \u00b7 The Passing Down",
+      "eyebrow": "Week Four · Waning · The Passing Down",
       "alt": "Week Four divider. A waning moon hangs in the window as the mother pours a stream of golden light down into her small daughter's cupped hands, a lantern glowing beside them. This week the light travels; watch where it goes.",
       "objects": [],
       "flames": [
@@ -205,7 +205,7 @@
     {
       "id": "night1",
       "kind": "night",
-      "eyebrow": "Night One \u00b7 The Cloud Who Chose a Garden",
+      "eyebrow": "Night One · The Cloud Who Chose a Garden",
       "alt": "Night One, The Cloud Who Chose a Garden. A small cloud settles low over a child asleep in a moonlit garden, keeping her in cool shade while other clouds race high above.",
       "objects": [],
       "glows": [
@@ -216,7 +216,30 @@
           "color": "#ffdf9e"
         }
       ],
-      "text": []
+      "text": [],
+      "textbox": {
+        "x": 6.6,
+        "y": 6.0,
+        "w": 38.5,
+        "h": 85.0
+      },
+      "content": {
+        "eyebrow": "Night One",
+        "title": "The Cloud Who Chose a Garden",
+        "body": [
+          "The big clouds raced across the sky, as big clouds do.",
+          "They wanted to be everywhere. They wanted to be seen by whole cities. They thundered so nobody would forget them.",
+          "But one small, fluffy cloud stopped, right over one small garden, and stayed.",
+          "“The sky is enormous!” the big clouds called down. “Why would you stay there?”",
+          "The little cloud did not answer the big clouds. She was busy.",
+          "Because in that garden, every day at noon, someone very small took her nap in the grass. The sun at noon is strong, and small sleepers are precious.",
+          "So the cloud spread herself out, soft and wide, like a blanket hung in the sky.",
+          "And the small sleeper slept in the coolest shade in the whole city. She never knew why, and never got burned, not once, not ever.",
+          "A girl who watches the sky will tell you clouds never stay.",
+          "Almost never."
+        ],
+        "coda": "The softest ones choose one garden, and guard one nap, and call it enough."
+      }
     }
   ]
 }

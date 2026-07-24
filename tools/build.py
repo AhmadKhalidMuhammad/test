@@ -24,7 +24,8 @@ def scene_descriptor(page):
     pid = page["id"]; d = PAGES / pid
     s = dict(id=pid, kind=page["kind"], eyebrow=page.get("eyebrow", ""), alt=page["alt"],
              twinkle=page.get("twinkle"), flames=page.get("flames", []),
-             glows=page.get("glows", []), streams=page.get("streams", []))
+             glows=page.get("glows", []), streams=page.get("streams", []),
+             content=page.get("content"), textbox=page.get("textbox"))
     layers_file = d / "layers.json"
     living = layers_file.exists()
     if living:
@@ -49,6 +50,16 @@ def scene_descriptor(page):
                                   w=pct(p["w"], iw), h=pct(p["h"], ih))
     else:
         s["img"] = datauri(d / "background.jpg", "image/jpeg")
+        with open(d / "background.jpg", "rb") as f:      # JPEG SOF0/2 gives H,W without Pillow
+            data = f.read()
+        i = 2
+        while i < len(data):
+            if data[i] != 0xFF: i += 1; continue
+            m = data[i+1]
+            if m in (0xC0, 0xC1, 0xC2, 0xC3):
+                hh = (data[i+5] << 8) | data[i+6]; ww = (data[i+7] << 8) | data[i+8]
+                s["aspect"] = round(ww / hh, 5); break
+            i += 2 + ((data[i+2] << 8) | data[i+3])
     return s
 
 def main():

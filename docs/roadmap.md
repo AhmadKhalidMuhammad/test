@@ -14,14 +14,14 @@ distance from the image's *local* sky, on a padded box, and every cut is verifie
 checkerboard (a sky pixel must read transparent, the object opaque). Locked in `tools/decompose.py`.
 *Reference: the cover — moon, cloud, and the full butterfly (both antennae, every wing edge).*
 
-### Job B ▶ — "I want to read the words, comfortably, on any screen."
-**The text layer.** Add a pipeline stage that detects the baked prose on each spread, inpaints it
-out to a clean background, and records where it sat; the words come from `content/manuscript.md`
-and are re-typeset **live** over the art with a reading-cadence reveal. This is the single biggest
-upgrade — it unblocks every story page, fixes small-phone readability, and makes the book
-accessible and translatable. *Deliverable: Night One fully live-typeset as the reference.*
+### Job B ✅ — "I want to read the words, comfortably, on any screen."
+**The text layer, proven on Night One.** `tools/decompose.py` now has a `detext` stage that
+inpaints the baked prose off a spread to a clean background; the words live in `content/book.json`
+and are re-typeset **live** over the art (eyebrow, serif title, two-column body, italic coda) in
+the book's palette, scaling with the art and revealing in a reading cadence. Accessible,
+reflowable, translatable. *Reference: Night One. Rolls out to every story page the same way.*
 
-### Job C ○ — "I want to feel inside each scene, not looking at a card."
+### Job C ▶ — "I want to feel inside each scene, not looking at a card."
 **The living-diorama pass.** Depth parallax on pointer/scroll per object plane, a barely-there
 camera settle on entry, and orchestrated text-with-art timing. Applied to the cover + Week One as
 the reference feel, then inherited by all pages. *This is the concrete answer to "not a slideshow."*

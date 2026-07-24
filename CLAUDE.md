@@ -29,9 +29,11 @@ runs Python or fetches anything.
   `objects` (with a `motion` and `depth`), overlay effects (`flames`/`glows`/`streams`/`twinkle`),
   optional `moonMorph`, and `text` ids into the manuscript. **Editing a page = editing this file**,
   not the engine.
-- **`content/manuscript.md`** holds the book's words as addressable blocks. Text is meant to be
-  rendered live over backgrounds, never baked into images. (Object cutting is implemented;
-  text-removal is the next pipeline stage — see `docs/architecture.md`.)
+- **`content/book.json`** also carries each page's live `content` (eyebrow/title/body/coda) and
+  its `textbox`; `content/manuscript.md` is the human-readable prose reference. Text is rendered
+  live over backgrounds, never baked in. Object cutting AND text-removal are both implemented
+  (`tools/decompose.py`: `extract` cuts objects, `detext` inpaints baked prose — Night One is the
+  live-text reference).
 - **`tools/decompose.py`** cuts each object off blue sky (warm objects via GrabCut with a
   blue-as-background trimap; colourful objects like the butterfly via a clean silhouette + a local
   antenna-reconnect box), inpaints the hole into `background.jpg` (a smooth 2D polynomial sky fit

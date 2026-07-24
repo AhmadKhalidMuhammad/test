@@ -161,6 +161,24 @@ def extract(name, warm=(), notblue=(), butterflies=(), telea_below=470):
     print(f"  {name}: {list(meta['layers'])}")
 
 
+def detext(name, boxes, radius=5):
+    """Remove baked prose from a spread and write the clean text-free background.
+    `boxes` are (x0,y0,x1,y1) rectangles around the text; within each, pixels markedly
+    darker than the local paper are inpainted away. The words are re-typeset live from
+    content/book.json over the result (see docs/architecture.md, Job B)."""
+    im = cv2.imread(str(SOURCES / f"{name}.jpg")); H, W = im.shape[:2]
+    V = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)[:, :, 2].astype(int)
+    mask = np.zeros((H, W), np.uint8)
+    for x0, y0, x1, y1 in boxes:
+        reg = V[y0:y1, x0:x1]
+        mask[y0:y1, x0:x1] = (reg < np.median(reg) - 40).astype(np.uint8)
+    mask = cv2.dilate(mask, np.ones((3, 3), np.uint8), iterations=2)
+    clean = cv2.inpaint(im, mask, radius, cv2.INPAINT_TELEA)
+    out = PAGES / name; out.mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(str(out / "background.jpg"), clean, [cv2.IMWRITE_JPEG_QUALITY, 92])
+    print(f"  detext {name}: removed {int(mask.sum())} px of baked text")
+
+
 if __name__ == "__main__":
     print("Extracting living scenes...")
     # bounding boxes are (x0, y0, x1, y1) in the spread's own pixels
@@ -176,4 +194,8 @@ if __name__ == "__main__":
             telea_below=460)
     # week3 (full moon) and week4 (waning crescent) sit small, through a window frame:
     # they are lit with a breathing glow overlay in build.py rather than cut out.
-    print("Done. Now run: python3 src/build.py")
+
+    # ---- text layer (Job B): lift the baked prose so it can be re-typeset live ----
+    detext("night1", [(135, 48, 300, 82), (132, 88, 475, 195),
+                      (133, 205, 535, 700), (553, 205, 895, 615)])
+    print("Done. Now run: python3 tools/build.py")

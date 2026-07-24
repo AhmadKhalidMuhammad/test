@@ -31,11 +31,26 @@ body{background:var(--matte); color:var(--ink); font-family:var(--sans);
 :root[data-theme="day"] .scrim{background:radial-gradient(130% 120% at 50% 42%, transparent 60%, rgba(60,50,20,.18))}
 
 /* stage shrink-wraps the plate; object layers are positioned in % within it */
-.stage{position:relative; z-index:3; line-height:0;
+.stage{position:relative; z-index:3; line-height:0; --u:13px;   /* --u = 1% of stage width, set by JS */
   filter:drop-shadow(0 26px 60px rgba(0,0,0,.5));
   opacity:0; transform:scale(1.04) translateY(14px);
   transition:opacity 1s var(--ease), transform 1.15s var(--ease); will-change:transform,opacity}
 .scene.active .stage{opacity:1; transform:none}
+
+/* live text (re-typeset over the art; sizes scale with the stage via cqw) */
+.textlayer{position:absolute; z-index:7; line-height:1.34; text-align:left; pointer-events:none;
+  font-family:var(--serif); color:#243056; display:flex; flex-direction:column}
+.textlayer > *{opacity:0; transform:translateY(calc(var(--u)*0.8)); transition:opacity .9s var(--ease), transform .9s var(--ease)}
+.scene.active .textlayer > *{opacity:1; transform:none}
+.scene.active .tl-eyebrow{transition-delay:.15s}
+.scene.active .tl-title{transition-delay:.3s}
+.scene.active .tl-body{transition-delay:.5s}
+.scene.active .tl-coda{transition-delay:.75s}
+.tl-eyebrow{text-transform:uppercase; letter-spacing:.2em; font-weight:700; color:#b0553a; font-size:calc(var(--u)*0.82); margin-bottom:calc(var(--u)*0.5)}
+.tl-title{font-weight:700; color:#1c2a55; font-size:calc(var(--u)*2.5); line-height:1.06; margin-bottom:calc(var(--u)*1.1); text-wrap:balance}
+.tl-body{column-count:2; column-gap:calc(var(--u)*2.2); font-size:calc(var(--u)*1.06)}
+.tl-body p{margin:0 0 calc(var(--u)*0.72); break-inside:avoid}
+.tl-coda{font-style:italic; color:#b0553a; font-size:calc(var(--u)*1.06); margin-top:calc(var(--u)*0.5); break-inside:avoid}
 .plate{display:block; max-width:min(96vw,1480px); max-height:86dvh; width:auto; height:auto; border-radius:3px}
 
 .layer{position:absolute; will-change:transform}
@@ -149,6 +164,7 @@ body{background:var(--matte); color:var(--ink); font-family:var(--sans);
   #deck{scroll-behavior:auto}
   .stage{transition:opacity .5s linear; transform:none !important}
   .m-moon,.m-cloudBreathe,.m-cloudDrift,.m-float,.m-sway,.m-butterfly,.part.wing,.halo,.flame,.glowspot,.cue .chev,#veil .moon,#rotate .icn{animation:none !important}
+  .textlayer > *{opacity:1 !important; transform:none !important; transition:none}
 }
 @media (max-width:640px){
   .plate{max-width:96vw}
