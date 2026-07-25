@@ -61,7 +61,7 @@ SCENES.forEach((s, i) => {
     const tl=el('div','textlayer',`left:${tb.x}%;top:${tb.y}%;width:${tb.w}%;height:${tb.h}%`);
     if (c.eyebrow) tl.appendChild(el('div','tl-eyebrow')).textContent=c.eyebrow;
     if (c.title){ const h=el('div','tl-title'); h.textContent=c.title; tl.appendChild(h); }
-    const body=el('div','tl-body');
+    const body=el('div','tl-body'); body.style.columnCount=c.columns||1;
     (c.body||[]).forEach(par=>{ const p=el('p'); p.textContent=par; body.appendChild(p); });
     tl.appendChild(body);
     if (c.coda){ const cd=el('div','tl-coda'); cd.textContent=c.coda; tl.appendChild(cd); }

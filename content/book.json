@@ -59,9 +59,34 @@
       "kind": "spread",
       "eyebrow": "Before the First Night",
       "alt": "The mother in her long indigo robe holds her small daughter's hand and they walk together toward a closed book, a crescent moon above and a butterfly nearby.",
-      "objects": [],
+      "objects": [
+        {
+          "id": "moon",
+          "motion": "moon",
+          "depth": 0.35,
+          "glow": "#ffe7a0",
+          "glowSize": 1.7
+        }
+      ],
       "twinkle": "sky",
-      "text": []
+      "text": [],
+      "textbox": {
+        "x": 52.5,
+        "y": 9,
+        "w": 34,
+        "h": 80
+      },
+      "content": {
+        "eyebrow": "Before the First Night",
+        "title": "Two more things, and then we begin.",
+        "body": [
+          "On the twenty-ninth night, this book will send you outside. Dress warmly. Take a tall hand with you.",
+          "And there is one page in here that stays closed… the rarest story, which only the sky can unlock, and only on the months that run long. Do not peek. It knows.",
+          "That is everything. The moon is already rising, and she does not like to be kept waiting by anyone except you."
+        ],
+        "coda": "Turn the page, little one.",
+        "columns": 1
+      }
     },
     {
       "id": "firststories",
@@ -238,7 +263,8 @@
           "A girl who watches the sky will tell you clouds never stay.",
           "Almost never."
         ],
-        "coda": "The softest ones choose one garden, and guard one nap, and call it enough."
+        "coda": "The softest ones choose one garden, and guard one nap, and call it enough.",
+        "columns": 2
       }
     }
   ]

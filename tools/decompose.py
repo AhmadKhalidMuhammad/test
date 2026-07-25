@@ -55,7 +55,7 @@ def _split_butterfly(im, mask, out, oid, axis_abs):
     whole["parts"] = parts
     return whole
 
-def extract(name, warm=(), notblue=(), butterflies=(), telea_below=470):
+def extract(name, warm=(), notblue=(), butterflies=(), detext_boxes=(), telea_below=470):
     im = cv2.imread(str(SOURCES / f"{name}.jpg")); H, W = im.shape[:2]
     hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
     Hh, S, V = hsv[:, :, 0].astype(int), hsv[:, :, 1].astype(int), hsv[:, :, 2].astype(int)
@@ -145,6 +145,17 @@ def extract(name, warm=(), notblue=(), butterflies=(), telea_below=470):
     usef = (uni_d.astype(np.float32) * band)[..., None]
     plate = (field * usef + telea * (1 - usef)).astype(np.uint8)
 
+    # remove baked prose from the (object-free) plate, so one background has both gone
+    if detext_boxes:
+        Vp = cv2.cvtColor(plate, cv2.COLOR_BGR2HSV)[:, :, 2].astype(int)
+        tmask = np.zeros((H, W), np.uint8)
+        for x0, y0, x1, y1 in detext_boxes:
+            reg = Vp[y0:y1, x0:x1]
+            tmask[y0:y1, x0:x1] = (reg < np.median(reg) - 30).astype(np.uint8)
+        tmask = cv2.dilate(tmask, np.ones((3, 3), np.uint8), iterations=3)
+        plate = cv2.inpaint(plate, tmask, 5, cv2.INPAINT_TELEA)
+        print(f"    {name}: removed {int(tmask.sum())} px of baked text")
+
     out = PAGES / name; out.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(out / "background.jpg"), plate, [cv2.IMWRITE_JPEG_QUALITY, 92])
     meta = {"w": W, "h": H, "layers": {}}
@@ -171,7 +182,7 @@ def detext(name, boxes, radius=5):
     mask = np.zeros((H, W), np.uint8)
     for x0, y0, x1, y1 in boxes:
         reg = V[y0:y1, x0:x1]
-        mask[y0:y1, x0:x1] = (reg < np.median(reg) - 40).astype(np.uint8)
+        mask[y0:y1, x0:x1] = (reg < np.median(reg) - 30).astype(np.uint8)
     mask = cv2.dilate(mask, np.ones((3, 3), np.uint8), iterations=2)
     clean = cv2.inpaint(im, mask, radius, cv2.INPAINT_TELEA)
     out = PAGES / name; out.mkdir(parents=True, exist_ok=True)
@@ -195,7 +206,11 @@ if __name__ == "__main__":
     # week3 (full moon) and week4 (waning crescent) sit small, through a window frame:
     # they are lit with a breathing glow overlay in build.py rather than cut out.
 
-    # ---- text layer (Job B): lift the baked prose so it can be re-typeset live ----
-    detext("night1", [(135, 48, 300, 82), (132, 88, 475, 195),
-                      (133, 205, 535, 700), (553, 205, 895, 615)])
+    # ---- text layer (Job B): lift baked prose so it can be re-typeset live ----
+    extract("night1", detext_boxes=[(135, 48, 300, 82), (132, 88, 475, 195),
+                                    (133, 205, 535, 700), (553, 205, 895, 615)])
+    # foreword: cut + animate the crescent moon AND lift its prose (text on the right)
+    extract("foreword2", warm=[("moon", (120, 30, 270, 240))],
+            detext_boxes=[(1055, 70, 1915, 122), (1055, 138, 1700, 438), (1030, 492, 1385, 695)],
+            telea_below=260)
     print("Done. Now run: python3 tools/build.py")

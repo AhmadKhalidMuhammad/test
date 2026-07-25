@@ -48,7 +48,7 @@ body{background:var(--matte); color:var(--ink); font-family:var(--sans);
 .scene.active .tl-coda{transition-delay:.75s}
 .tl-eyebrow{text-transform:uppercase; letter-spacing:.2em; font-weight:700; color:#b0553a; font-size:calc(var(--u)*0.82); margin-bottom:calc(var(--u)*0.5)}
 .tl-title{font-weight:700; color:#1c2a55; font-size:calc(var(--u)*2.5); line-height:1.06; margin-bottom:calc(var(--u)*1.1); text-wrap:balance}
-.tl-body{column-count:2; column-gap:calc(var(--u)*2.2); font-size:calc(var(--u)*1.06)}
+.tl-body{column-count:1; column-gap:calc(var(--u)*2.2); font-size:calc(var(--u)*1.06)}
 .tl-body p{margin:0 0 calc(var(--u)*0.72); break-inside:avoid}
 .tl-coda{font-style:italic; color:#b0553a; font-size:calc(var(--u)*1.06); margin-top:calc(var(--u)*0.5); break-inside:avoid}
 .plate{display:block; max-width:min(96vw,1480px); max-height:86dvh; width:auto; height:auto; border-radius:3px}
