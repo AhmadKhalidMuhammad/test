@@ -145,13 +145,18 @@ def extract(name, warm=(), notblue=(), butterflies=(), detext_boxes=(), telea_be
     usef = (uni_d.astype(np.float32) * band)[..., None]
     plate = (field * usef + telea * (1 - usef)).astype(np.uint8)
 
-    # remove baked prose from the (object-free) plate, so one background has both gone
+    # remove baked prose from the (object-free) plate, so one background has both gone.
+    # Colour-aware: any pixel whose CIELab distance from the local paper exceeds `thr`
+    # is text -- catches navy AND red/italic strokes fully (no faint ghosts left behind).
     if detext_boxes:
-        Vp = cv2.cvtColor(plate, cv2.COLOR_BGR2HSV)[:, :, 2].astype(int)
         tmask = np.zeros((H, W), np.uint8)
-        for x0, y0, x1, y1 in detext_boxes:
-            reg = Vp[y0:y1, x0:x1]
-            tmask[y0:y1, x0:x1] = (reg < np.median(reg) - 30).astype(np.uint8)
+        for x0, y0, x1, y1, *thr in detext_boxes:
+            t = thr[0] if thr else 16
+            reg = plate[y0:y1, x0:x1]
+            paper = np.median(reg.reshape(-1, 3), 0).astype(np.uint8)
+            lab = cv2.cvtColor(reg, cv2.COLOR_BGR2LAB).astype(np.float32)
+            plab = cv2.cvtColor(np.uint8([[paper]]), cv2.COLOR_BGR2LAB)[0, 0].astype(np.float32)
+            tmask[y0:y1, x0:x1] = (np.sqrt(((lab - plab) ** 2).sum(2)) > t).astype(np.uint8)
         tmask = cv2.dilate(tmask, np.ones((3, 3), np.uint8), iterations=3)
         plate = cv2.inpaint(plate, tmask, 5, cv2.INPAINT_TELEA)
         print(f"    {name}: removed {int(tmask.sum())} px of baked text")
