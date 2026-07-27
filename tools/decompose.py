@@ -214,6 +214,7 @@ if __name__ == "__main__":
     # ---- text layer (Job B): lift baked prose so it can be re-typeset live ----
     extract("night1", detext_boxes=[(135, 48, 300, 82), (132, 88, 475, 195),
                                     (133, 205, 535, 700), (553, 205, 895, 615)])
+    extract("foreword1", detext_boxes=[(64, 38, 520, 102), (64, 98, 720, 565)])
     # foreword: cut + animate the crescent moon AND lift its prose (text on the right)
     extract("foreword2", warm=[("moon", (120, 30, 270, 240))],
             detext_boxes=[(1055, 70, 1915, 122), (1055, 138, 1700, 438), (1030, 492, 1385, 695)],

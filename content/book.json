@@ -52,7 +52,26 @@
       "alt": "An open book rests in a moonlit garden, holding a crown, a lantern, a ship's wheel, a small blue book and a butterfly, while three moon faces drift above it.",
       "objects": [],
       "twinkle": "sky",
-      "text": []
+      "text": [],
+      "textbox": {
+        "x": 3.6,
+        "y": 5,
+        "w": 31,
+        "h": 74
+      },
+      "content": {
+        "eyebrow": "",
+        "title": "Before the First Night",
+        "columns": 1,
+        "body": [
+          "This is not an ordinary book, little one, so it is only fair to warn you.",
+          "Ordinary books do not care what the sky is doing. This one does.",
+          "Inside are stories for every night the moon has… twenty-eight of them, arranged the way she arranges herself: growing, filling, giving, resting. Read one each night, in order, and you and the moon will arrive at the dark together, and begin again together, the way old friends finish walks.",
+          "You may notice, as you go, that many of the stories seem to be about someone you know. A cloud, a queen, a lantern-keeper, a general who never shouts… and always, somewhere nearby, someone small, watching, learning, beginning to glow.",
+          "The book will not say who they are.",
+          "Books are like mirrors that way. They only show you what you bring."
+        ]
+      }
     },
     {
       "id": "foreword2",
