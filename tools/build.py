@@ -25,7 +25,8 @@ def scene_descriptor(page):
     s = dict(id=pid, kind=page["kind"], eyebrow=page.get("eyebrow", ""), alt=page["alt"],
              twinkle=page.get("twinkle"), flames=page.get("flames", []),
              glows=page.get("glows", []), streams=page.get("streams", []),
-             content=page.get("content"), textbox=page.get("textbox"))
+             content=page.get("content"), textbox=page.get("textbox"),
+             texts=page.get("texts"))
     layers_file = d / "layers.json"
     living = layers_file.exists()
     if living:

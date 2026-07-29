@@ -55,18 +55,20 @@ SCENES.forEach((s, i) => {
   if (s.twinkle){ const c=el('canvas','twk'); stage.appendChild(c); }
   if (s.streams && s.streams.length){ const rc=el('canvas','rainc'); rc._streams=s.streams; stage.appendChild(rc); }
 
-  // live text (re-typeset from content, never baked into the art)
-  if (s.content && s.textbox){
-    const tb=s.textbox, c=s.content;
-    const tl=el('div','textlayer',`left:${tb.x}%;top:${tb.y}%;width:${tb.w}%;height:${tb.h}%`);
-    if (c.eyebrow) tl.appendChild(el('div','tl-eyebrow')).textContent=c.eyebrow;
+  // live text (re-typeset from content, never baked into the art). A page may carry one
+  // block (content + textbox) or several (texts:[{textbox,content}]) for split layouts.
+  const texts = s.texts || (s.content && s.textbox ? [{textbox:s.textbox, content:s.content}] : []);
+  texts.forEach(t=>{
+    const tb=t.textbox, c=t.content;
+    const tl=el('div','textlayer',`left:${tb.x}%;top:${tb.y}%;width:${tb.w}%;height:${tb.h}%`+
+      (c.align?`;text-align:${c.align}`:''));
+    if (c.eyebrow){ const e=el('div','tl-eyebrow'); e.textContent=c.eyebrow; tl.appendChild(e); }
     if (c.title){ const h=el('div','tl-title'); h.textContent=c.title; tl.appendChild(h); }
-    const body=el('div','tl-body'); body.style.columnCount=c.columns||1;
-    (c.body||[]).forEach(par=>{ const p=el('p'); p.textContent=par; body.appendChild(p); });
-    tl.appendChild(body);
+    if (c.body){ const body=el('div','tl-body'); body.style.columnCount=c.columns||1;
+      c.body.forEach(par=>{ const p=el('p'); p.textContent=par; body.appendChild(p); }); tl.appendChild(body); }
     if (c.coda){ const cd=el('div','tl-coda'); cd.textContent=c.coda; tl.appendChild(cd); }
     stage.appendChild(tl);
-  }
+  });
 
   sec.appendChild(stage);
   if (i===0){ const cue=el('div','cue'); cue.id='cue'; cue.innerHTML='Scroll<span class="chev"></span>'; sec.appendChild(cue); }

@@ -40,6 +40,11 @@ boxes in `tools/decompose.py`, add a page entry to `content/book.json`, and rebu
 motion, morph, navigation, and accessibility are shared, so every page inherits them.
 
 ## Status
-Foundation + intro and the four week introductions are alive; the moon **morphs** from crescent to
-first quarter across the Week One to Week Two turn. Remaining pages are decomposed and animated
-through the pipeline, week by week, per `docs/roadmap.md`.
+- **Pipeline proven & solid:** object cutting (GrabCut vs. local sky, verified on a checkerboard)
+  and colour-aware text removal, feeding a small data-driven engine.
+- **Composed as live text:** the whole front matter — *Before the First Night* (both foreword
+  spreads) — and *Night One*, over clean text-removed backgrounds.
+- **Alive:** cover (moon, cloud, butterfly), the four week introductions, and the moon **morph**
+  from crescent to first quarter across the Week One → Week Two turn.
+- **Remaining:** the First Stories myths and the 28 nights, composed page by page through the same
+  pipeline (`docs/roadmap.md`). This is a production run, not new invention.
